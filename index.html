@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LxPlayer - Cyber-Dark IPTV & Media Center</title>
+    <link rel="icon" type="image/png" href="./logo1.png" />
+    <!-- Modern Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --color-accent: #8b5cf6;
+        --color-accent-hover: #7c3aed;
+        --color-glow: rgba(139, 92, 246, 0.45);
+        --color-gradient-from: #8b5cf6;
+        --color-gradient-to: #6d28d9;
+      }
+      * {
+        user-select: none;
+        -webkit-user-drag: none;
+      }
+      input, textarea {
+        user-select: text;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #09090D;
+        color: #ffffff;
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        overflow: hidden;
+      }
+      /* Custom Scrollbars */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: rgba(19, 19, 26, 0.5);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #262638;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-accent);
+      }
+    </style>
+  </head>
+  <body class="bg-[#09090D] text-white antialiased selection:bg-purple-600/30">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

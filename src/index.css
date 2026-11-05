@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --lx-accent: #8b5cf6;
+  --lx-accent-hover: #7c3aed;
+  --lx-accent-rgb: 139, 92, 246;
+  --lx-accent-glow: rgba(139, 92, 246, 0.45);
+  --lx-gradient-from: #8b5cf6;
+  --lx-gradient-to: #6d28d9;
+  /* Compatibility aliases */
+  --color-accent: var(--lx-accent);
+  --color-accent-hover: var(--lx-accent-hover);
+  --color-glow: var(--lx-accent-glow);
+  --color-gradient-from: var(--lx-gradient-from);
+  --color-gradient-to: var(--lx-gradient-to);
+}
+
+@layer utilities {
+  .drag-region {
+    -webkit-app-region: drag;
+  }
+  .no-drag-region {
+    -webkit-app-region: no-drag;
+  }
+  
+  /* Cyber-Dark Glassmorphism */
+  .glass-card {
+    background: rgba(19, 19, 26, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(38, 38, 56, 0.75);
+  }
+  
+  .glass-card-hover {
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .glass-card-hover:hover {
+    border-color: var(--lx-accent);
+    box-shadow: 0 8px 30px -10px var(--lx-accent-glow);
+    transform: translateY(-2px);
+  }
+
+  .glass-panel {
+    background: rgba(24, 24, 36, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(45, 45, 68, 0.85);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 12px var(--lx-accent-glow);
+  }
+
+  /* Universal Dynamic Theme Utility Classes */
+  .bg-theme {
+    background-color: var(--lx-accent);
+  }
+  .bg-theme-hover:hover {
+    background-color: var(--lx-accent-hover);
+  }
+  .text-theme {
+    color: var(--lx-accent);
+  }
+  .border-theme {
+    border-color: var(--lx-accent);
+  }
+  .shadow-theme-glow {
+    box-shadow: 0 0 20px var(--lx-accent-glow);
+  }
+  .pill-theme-active {
+    background-color: var(--lx-accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 18px var(--lx-accent-glow) !important;
+  }
+  .bg-theme-soft {
+    background-color: rgba(var(--lx-accent-rgb), 0.12);
+  }
+  .border-theme-soft {
+    border-color: rgba(var(--lx-accent-rgb), 0.28);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.75;
+    transform: scale(1.04);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
