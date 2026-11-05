@@ -56,7 +56,7 @@ export function normalizeServerUrl(url) {
 /**
  * Builds playable stream URL with fallback extension support
  */
-export function buildStreamUrl(profile, streamId, type = 'live', extension = 'ts') {
+export function buildStreamUrl(profile, streamId, type = 'live', extension = null) {
   if (!profile || !profile.serverUrl || profile.isDemo) {
     return null;
   }
@@ -65,12 +65,14 @@ export function buildStreamUrl(profile, streamId, type = 'live', extension = 'ts
   const u = encodeURIComponent(profile.username || '');
   const p = encodeURIComponent(profile.password || '');
 
+  const resolvedExt = extension !== null ? extension : (type === 'live' ? 'm3u8' : 'mp4');
+
   if (type === 'live') {
-    return extension ? `${server}/live/${u}/${p}/${cleanId}.${extension}` : `${server}/live/${u}/${p}/${cleanId}`;
+    return resolvedExt ? `${server}/live/${u}/${p}/${cleanId}.${resolvedExt}` : `${server}/live/${u}/${p}/${cleanId}`;
   } else if (type === 'movie') {
-    return `${server}/movie/${u}/${p}/${cleanId}.${extension || 'mp4'}`;
+    return `${server}/movie/${u}/${p}/${cleanId}.${resolvedExt || 'mp4'}`;
   } else if (type === 'series') {
-    return `${server}/series/${u}/${p}/${cleanId}.${extension || 'mp4'}`;
+    return `${server}/series/${u}/${p}/${cleanId}.${resolvedExt || 'mp4'}`;
   }
   return `${server}/${u}/${p}/${cleanId}`;
 }

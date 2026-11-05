@@ -346,17 +346,26 @@ export default function PlayerScreen() {
     }
   }, [prevEpisode, playEpisodeItem]);
 
-  // Stream URL oluşturucu
+  // Stream URL oluşturucu (HLS .m3u8 öncelikli)
   const getStreamUrl = (attempt = 0) => {
     if (!currentStream) return '';
-    if (currentStream.url) return currentStream.url;
+    if (currentStream.url) {
+      // M3U canlı yayınlarında .ts uzantısı Hls.js'de takılmaya yol açtığı için ilk denemede .m3u8 denenir
+      if (streamType === 'live' && currentStream.url.includes('.ts')) {
+        if (attempt === 0) {
+          return currentStream.url.replace(/\.ts(\?.*)?$/i, '.m3u8$1');
+        }
+      }
+      return currentStream.url;
+    }
 
     const streamId = currentStream.stream_id || currentStream.id;
-    const prefExt = currentStream.container_extension || (streamType === 'live' ? 'ts' : 'mp4');
+    const prefExt = currentStream.container_extension || (streamType === 'live' ? 'm3u8' : 'mp4');
 
     if (streamType === 'live') {
-      if (attempt === 0) return buildStreamUrl(activeProfile, streamId, 'live', 'ts');
-      if (attempt === 1) return buildStreamUrl(activeProfile, streamId, 'live', 'm3u8');
+      // Hls.js motoru .m3u8 oynatma listesi ile anında (0.5s) başlar; .ts ham akışında manifestParsingError verir
+      if (attempt === 0) return buildStreamUrl(activeProfile, streamId, 'live', 'm3u8');
+      if (attempt === 1) return buildStreamUrl(activeProfile, streamId, 'live', 'ts');
       return buildStreamUrl(activeProfile, streamId, 'live', '');
     } else if (streamType === 'movie') {
       if (attempt === 0) return buildStreamUrl(activeProfile, streamId, 'movie', prefExt);
@@ -486,10 +495,23 @@ export default function PlayerScreen() {
 
       const hls = new Hls({
         enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 90,
+        lowLatencyMode: false, // IPTV standart HLS akışlarında donma ve tampon yetersizliğini önler
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 10,
+        manifestLoadingTimeOut: 10000,
+        manifestLoadingMaxRetry: 3,
+        levelLoadingTimeOut: 10000,
+        fragLoadingTimeOut: 15000,
+        fragLoadingMaxRetry: 4,
         subtitleDisplay: true,
       });
+
+      let networkErrorRetries = 0;
+      let mediaErrorRetries = 0;
 
       hlsRef.current = hls;
       hls.loadSource(targetUrl);
@@ -570,7 +592,23 @@ export default function PlayerScreen() {
 
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
-          console.warn('HLS Fatal Error:', data.type);
+          console.warn('HLS Fatal Error:', data.type, data.details);
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+            if (networkErrorRetries < 2) {
+              networkErrorRetries++;
+              console.log(`[LxPlayer HLS] Recovering network error (attempt ${networkErrorRetries})...`);
+              hls.startLoad();
+              return;
+            }
+          } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+            if (mediaErrorRetries < 2) {
+              mediaErrorRetries++;
+              console.log(`[LxPlayer HLS] Recovering media error (attempt ${mediaErrorRetries})...`);
+              hls.recoverMediaError();
+              return;
+            }
+          }
+
           if (fallbackAttempt < 2) {
             setFallbackAttempt((prev) => prev + 1);
           } else {
